@@ -1,13 +1,16 @@
 void setup() {
-  //delay(500);
   pinMode(LED_BUILTIN, OUTPUT);
   commInit();
-  //initSd();
+  initSd();
 }
 
+bool logging = false;
+
 void loop() {
-  //commRequest();
-  //delay(2000);
-  //sdWrite();
   transmit();
+  digitalWrite(LED_BUILTIN, logging);
+  if (logging) {
+    // Write to log
+    //sdWrite();
+  }
 }

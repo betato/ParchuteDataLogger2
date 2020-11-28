@@ -12,6 +12,8 @@
 #define OP_BAD 2
 #define OP_START 3
 #define OP_STOP 4
+#define OP_REQUEST 5
+#define OP_DATA 6
 
 void commInit() {
   // Enable DI2C IC
@@ -22,12 +24,13 @@ void commInit() {
   Wire.onReceive(received);
 }
 
+bool sdError = false;
 bool sendCheckResponse = false;
+
 void transmit() {
   if (sendCheckResponse) {
-    digitalWrite(LED_BUILTIN, HIGH);
     Wire.beginTransmission(ADDR_BUTTON);
-    Wire.write(OP_GOOD);
+    Wire.write(sdError ? OP_BAD : OP_GOOD);
     Wire.write(ADDR_LOGGER);
     Wire.endTransmission();
     sendCheckResponse = false;
@@ -36,15 +39,16 @@ void transmit() {
 
 
 void received(int numBytes) {
-  byte opcode;
+  byte command;
   if (Wire.available()) {
-    opcode = Wire.read();
+    command = Wire.read();
   }
 
   // Send check response
-  if (opcode == OP_CHECK)
+  if (command == OP_CHECK)
     sendCheckResponse = true;
-
-  if (opcode == OP_START)
-    sendCheckResponse = true;
+  else if (command == OP_START)
+    logging = true;
+  else if (command == OP_STOP)
+    logging = false; 
 }

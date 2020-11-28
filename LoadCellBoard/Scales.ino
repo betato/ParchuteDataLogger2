@@ -47,6 +47,7 @@ bool scalesReady() {
 }
 
 void setScalePower(bool on) {
+  digitalWrite(LED_BUILTIN, on);
   if (on) {
     verticalScale.power_up();
     axialScale.power_up();

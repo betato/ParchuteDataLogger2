@@ -20,7 +20,7 @@ void commInit() {
   pinMode(DI2C_EN, OUTPUT);
   digitalWrite(DI2C_EN, HIGH);
   // Init
-  Wire.begin(ADDR_LOADCELL);
+  Wire.begin(ADDR_ANEMOMETER);
   Wire.onReceive(received);
 }
 
@@ -30,7 +30,7 @@ void transmit() {
   if (sendCheckResponse) {
     Wire.beginTransmission(ADDR_BUTTON);
     Wire.write(OP_GOOD);
-    Wire.write(ADDR_LOADCELL);
+    Wire.write(ADDR_ANEMOMETER);
     Wire.endTransmission();
     sendCheckResponse = false;
   }
@@ -38,6 +38,8 @@ void transmit() {
 
 
 void received(int numBytes) {
+  digitalWrite(LED_BUILTIN, HIGH);
+  
   byte command;
   if (Wire.available()) {
     command = Wire.read();
@@ -47,9 +49,7 @@ void received(int numBytes) {
   if (command == OP_CHECK)
     sendCheckResponse = true;
 
-  // Power scales on/off
-  else if (command == OP_START)
-    setScalePower(true);
-  else if (command == OP_STOP)
-    setScalePower(false);
+  // Sync clocks
+  //else if (command == OP_REQUEST)
+  
 }

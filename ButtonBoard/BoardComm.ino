@@ -10,8 +10,10 @@
 #define OP_CHECK 0
 #define OP_GOOD 1
 #define OP_BAD 2
-#define OP_START 2
-#define OP_STOP 3
+#define OP_START 3
+#define OP_STOP 4
+#define OP_REQUEST 5
+#define OP_DATA 6
 
 void commInit() {
   // Enable DI2C IC
@@ -44,23 +46,33 @@ void checkConnections() {
 
 void syncTime() {
   // Synchronize logger and anemometer boards
+  
+}
+
+void setLoadcells(bool enabled) {
+  // Power on/off load cell amplifiers
+  
+}
+
+void setLogging(bool enabled) {
+  // Start/stop logging
+  
 }
 
 void logPoint() {
+  // Prompt load cell board to send data to logger board
   Wire.beginTransmission(ADDR_LOADCELL);
-  Wire.write("x is ");
+  Wire.write(OP_REQUEST);
   Wire.endTransmission();
 }
 
 void received(int numBytes) {
-  digitalWrite(LED_BUILTIN, HIGH);
-  // Get opcode
-  byte opcode;
+  byte command;
   if (Wire.available()) {
-    opcode = Wire.read();
+    command = Wire.read();
   }
 
-  if (opcode == OP_GOOD && Wire.available()) {
+  if (command == OP_GOOD && Wire.available()) {
     byte module = Wire.read();
     if (module == ADDR_LOGGER){
       digitalWrite(LED_2, HIGH);

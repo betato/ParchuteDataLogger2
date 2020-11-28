@@ -10,12 +10,12 @@ void initSd() {
   pinMode(SD_SW, INPUT_PULLUP);
   if (digitalRead(SD_SW) == HIGH) {
     Serial.println("Missing SD card");
-    stopForError();
+    sdError = true;
   }
   
   if (!SD.begin(CHIP_SELECT)) {
     Serial.println("Card initialization failed");
-    stopForError();
+    sdError = true;
   }
   Serial.println("SD card initialized");
 }
@@ -31,7 +31,7 @@ void newFile() {
   File logFile = SD.open(fileName, FILE_WRITE);
   if (!logFile) {
     Serial.println("Error creating file");
-    stopForError();
+    sdError = true;
   }
 }
 
@@ -46,15 +46,6 @@ void sdWrite() {
     logFile.close();
   } else {
     Serial.println("Error opening file");
-    stopForError();
-  }
-}
-
-void stopForError() {
-  while(1) {
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(500);
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(500);
+    sdError = true;
   }
 }
