@@ -6,9 +6,9 @@
 #define HORIZONTAL_DOUT 9
 #define LOADCELL_SCK 10
 
-#define VERTICAL_SCALE 41615.3
-#define AXIAL_SCALE 41615.3
-#define HORIZONTAL_SCALE 41615.3
+#define VERTICAL_SCALE -6087.36 // Scaling factor from calibration [1/N]
+#define AXIAL_SCALE
+#define HORIZONTAL_SCALE -6087.36
 
 HX711 verticalScale;
 HX711 axialScale;
