@@ -27,19 +27,27 @@ void initScales() {
   horizontalScale.set_scale(HORIZONTAL_SCALE);
   horizontalScale.tare();
   
-  setScalePower(false);
+  setScalePower(true);
 }
 
 float getVertical() {
-  return verticalScale.get_units(1);
+  float vf = verticalScale.get_units(1);
+  Serial.print(vf);
+  Serial.print(",");
+  return vf;
 }
 
 float getAxial() {
-  return axialScale.get_units(1);
+  float vf = axialScale.get_units(1);
+  Serial.print(vf);
+  Serial.print(",");
+  return vf;
 }
 
 float getHorizontal() {
-  return horizontalScale.get_units(1);
+  float vf = horizontalScale.get_units(1);
+  Serial.println(vf);
+  return vf;
 }
 
 bool scalesReady() {

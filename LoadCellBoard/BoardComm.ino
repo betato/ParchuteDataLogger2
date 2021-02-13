@@ -20,19 +20,38 @@ void commInit() {
   pinMode(DI2C_EN, OUTPUT);
   digitalWrite(DI2C_EN, HIGH);
   // Init
+  Wire.setTimeout(400);
   Wire.begin(ADDR_LOADCELL);
   Wire.onReceive(received);
 }
 
 bool sendCheckResponse = false;
-
+bool transmitNow = false;
+union floatToBytes {
+    char c[4];
+    float f;
+} converter;
+  
 void transmit() {
   if (sendCheckResponse) {
     Wire.beginTransmission(ADDR_BUTTON);
-    Wire.write(OP_GOOD);
+    Wire.write(scalesReady() ? OP_GOOD : OP_BAD);
     Wire.write(ADDR_LOADCELL);
     Wire.endTransmission();
     sendCheckResponse = false;
+  } else if (transmitNow) {
+    Wire.beginTransmission(ADDR_LOGGER);
+    Wire.write(OP_DATA);
+    converter.f = getVertical();
+    Wire.write(converter.c);
+    delay(100);
+    converter.f = getAxial();
+    Wire.write(converter.c);
+    delay(100);
+    converter.f = getHorizontal();
+    Wire.write(converter.c);
+    Wire.endTransmission();
+    transmitNow = false;
   }
 }
 
@@ -44,12 +63,17 @@ void received(int numBytes) {
   }
 
   // Send check response
-  if (command == OP_CHECK)
+  if (command == OP_CHECK) {
     sendCheckResponse = true;
 
   // Power scales on/off
-  else if (command == OP_START)
+  } else if (command == OP_START) {
     setScalePower(true);
-  else if (command == OP_STOP)
+  } else if (command == OP_STOP) {
     setScalePower(false);
+
+  // Send data to logger board
+  } else if (command == OP_REQUEST) {
+    transmitNow = true;
+  }
 }

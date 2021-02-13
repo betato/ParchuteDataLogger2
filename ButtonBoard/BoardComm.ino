@@ -20,6 +20,7 @@ void commInit() {
   pinMode(DI2C_EN, OUTPUT);
   digitalWrite(DI2C_EN, HIGH);
   // Init
+  Wire.setTimeout(400);
   Wire.begin(ADDR_BUTTON);
   Wire.onReceive(received);
 }
@@ -46,17 +47,25 @@ void checkConnections() {
 
 void syncTime() {
   // Synchronize logger and anemometer boards
-  
+  Wire.beginTransmission(ADDR_ANEMOMETER);
+  Wire.write(OP_REQUEST);
+  Wire.endTransmission();
 }
 
 void setLoadcells(bool enabled) {
   // Power on/off load cell amplifiers
-  
+  Wire.beginTransmission(ADDR_LOADCELL);
+  Wire.write(enabled ? OP_START : OP_STOP);
+  Wire.endTransmission();
 }
 
 void setLogging(bool enabled) {
   // Start/stop logging
-  
+  Wire.beginTransmission(ADDR_LOGGER);
+  Wire.write(enabled ? OP_START : OP_STOP);
+  Wire.endTransmission();
+  digitalWrite(LED_1, enabled);
+  digitalWrite(LED_2, enabled);
 }
 
 void logPoint() {
@@ -65,6 +74,8 @@ void logPoint() {
   Wire.write(OP_REQUEST);
   Wire.endTransmission();
 }
+
+bool ledToggle = false;
 
 void received(int numBytes) {
   byte command;
@@ -81,5 +92,8 @@ void received(int numBytes) {
     } else if (module == ADDR_ANEMOMETER){
       digitalWrite(LED_4, HIGH);
     }
+  } else if (command == OP_DATA) {
+    digitalWrite(LED_2, ledToggle);
+    ledToggle = !ledToggle;
   }
 }

@@ -20,16 +20,18 @@ void commInit() {
   pinMode(DI2C_EN, OUTPUT);
   digitalWrite(DI2C_EN, HIGH);
   // Init
+  Wire.setTimeout(400);
   Wire.begin(ADDR_ANEMOMETER);
   Wire.onReceive(received);
 }
 
 bool sendCheckResponse = false;
+bool sdError = false;
 
 void transmit() {
   if (sendCheckResponse) {
     Wire.beginTransmission(ADDR_BUTTON);
-    Wire.write(OP_GOOD);
+    Wire.write(sdError ? OP_BAD : OP_GOOD);
     Wire.write(ADDR_ANEMOMETER);
     Wire.endTransmission();
     sendCheckResponse = false;

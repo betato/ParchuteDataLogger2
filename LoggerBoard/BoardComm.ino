@@ -20,6 +20,7 @@ void commInit() {
   pinMode(DI2C_EN, OUTPUT);
   digitalWrite(DI2C_EN, HIGH);
   // Init
+  Wire.setTimeout(400);
   Wire.begin(ADDR_LOGGER);
   Wire.onReceive(received);
 }
@@ -37,6 +38,11 @@ void transmit() {
   }
 }
 
+void sendLogEvent() {
+  Wire.beginTransmission(ADDR_BUTTON);
+  Wire.write(OP_DATA);
+  Wire.endTransmission();
+}
 
 void received(int numBytes) {
   byte command;
@@ -45,10 +51,36 @@ void received(int numBytes) {
   }
 
   // Send check response
-  if (command == OP_CHECK)
+  if (command == OP_CHECK) {
     sendCheckResponse = true;
-  else if (command == OP_START)
+  } else if (command == OP_START) {
     logging = true;
-  else if (command == OP_STOP)
-    logging = false; 
+    newFile();
+    
+  } else if (command == OP_STOP) {
+    logging = false;
+    
+  } else if (command == OP_DATA) {
+    // Load cell data recieved
+    logData[logCount][0] = millis()/1000.0;
+    logData[logCount][1] = getVelocity();
+    logData[logCount][2] = wireReadFloat();
+    logData[logCount][3] = wireReadFloat();
+    logData[logCount][3] = wireReadFloat();
+    
+    logRecieved = true;
+  }
+}
+
+union floatToBytes {
+    char c[4];
+    float f;
+} converter;
+
+float wireReadFloat() {
+  int i = 0;
+  while (Wire.available()) {
+    converter.c[i++] = Wire.read();
+  }
+  return converter.f;
 }

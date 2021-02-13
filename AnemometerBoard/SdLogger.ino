@@ -29,9 +29,7 @@ void newFile() {
   }
   fileName = getFileName(fileCount);
   File logFile = SD.open(fileName, FILE_WRITE);
-  if (logFile) {
-    Serial.println("New file created");
-  } else {
+  if (!logFile) {
     Serial.println("Error creating file");
     sdError = true;
   }
@@ -41,20 +39,12 @@ String getFileName(int i){
   return "LOG_" + String(fileCount) + ".CSV";
 }
 
-void sdWrite(float data[][5], int len) {
+void logData(float angle, float velocity) {
   File logFile = SD.open(fileName, FILE_WRITE);
   if (logFile) {
-    for (int i = 0; i < len; i++) {
-      logFile.print(data[i][0], 3);   // Time
-      logFile.print(", ");
-      logFile.print(data[i][1], 2);   // Velocity
-      logFile.print(", ");
-      logFile.print(data[i][2], 2);   // Vertical
-      logFile.print(", ");
-      logFile.print(data[i][3], 2);   // Axial
-      logFile.print(", ");
-      logFile.println(data[i][4], 2); // Horizontal
-    }
+    logFile.print(angle);
+    logFile.print(",");
+    logFile.println(velocity);
     logFile.close();
   } else {
     Serial.println("Error opening file");
